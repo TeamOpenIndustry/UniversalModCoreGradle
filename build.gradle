@@ -1,35 +1,85 @@
 plugins {
-    // Apply the java plugin to add support for Java
     id 'java'
-
-    // Apply the application plugin to add support for building a CLI application.
-    id 'application'
+    id 'groovy'
+    id 'maven-publish'
+    id "java-gradle-plugin"
+    id "com.gradle.plugin-publish" version "0.10.1"
 }
 
+group 'cam72cam.universalmodcore'
+version '0.1.0'
+sourceCompatibility = 1.8
+
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    mavenCentral()
+}
+
+configurations {
+    shade
 }
 
 dependencies {
     compile 'org.apache.commons:commons-io:1.3.2'
+    shade 'org.apache.commons:commons-io:1.3.2'
     compile 'com.google.code.gson:gson:2.8.6'
+    shade 'com.google.code.gson:gson:2.8.6'
 }
 
-application {
-    // Define the main class for the application.
-    mainClassName = 'cam72cam.setup.Setup'
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+gradlePlugin {
+    plugins {
+        curseGradlePlugin {
+            id = 'cam72cam.universalmodcore'
+            implementationClass = 'cam72cam.universalmodcore.UMCPlugin'
+        }
+    }
+}
+
+
+pluginBundle {
+    website = 'https://github.com/TeamOpenIndustry/UniversalModCoreGradle'
+    vcsUrl = 'https://github.com/TeamOpenIndustry/UniversalModCoreGradle'
+    description = 'Allow users to build the same code for any minecraft version'
+
+    plugins() {
+        curseGradlePlugin {
+            displayName = 'Universal Mod Core'
+            version = project.version
+            tags = ['maven', 'minecraft', 'forge']
+        }
+    }
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact sourcesJar {
+                classifier "sources"
+            }
+        }
+    }
 }
 
 jar {
-  manifest {
-    attributes(
-      'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-      'Main-Class': 'cam72cam.setup.Setup'
-    )
-  }
   from {
-    configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    configurations.shade.collect { it.isDirectory() ? it : zipTree(it) }
   }
 }

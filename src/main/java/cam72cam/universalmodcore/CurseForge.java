@@ -1,4 +1,4 @@
-package cam72cam.setup;
+package cam72cam.universalmodcore;
 
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
