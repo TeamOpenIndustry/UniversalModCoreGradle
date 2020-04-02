@@ -73,7 +73,7 @@ public class Config {
                 throw new RuntimeException(String.format("Unable to locate version '%s' for Minecraft '%s'", vars.get("UMC_VERSION"), loaderVersion));
             }
             vars.put("UMC_DOWNLOAD", asset.get().downloadUrl);
-            vars.put("UMC_DEPENDENCY", String.format("curse.maven:universalmodcore:%s", asset.get().id));
+            vars.put("UMC_DEPENDENCY", String.format("'curse.maven:universalmodcore:%s'", asset.get().id));
         }
     }
 
