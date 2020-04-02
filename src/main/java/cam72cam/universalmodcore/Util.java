@@ -27,7 +27,7 @@ public class Util {
             uri = uri.replaceFirst("http://", "git@");
             uri = uri.replaceFirst("/", ":");
         }
-        if (!isGit && wantsHttp) {
+        if (isGit && wantsHttp) {
             uri = uri.replaceFirst(":", "/");
             uri = uri.replaceFirst("git@", "https://");
         }
