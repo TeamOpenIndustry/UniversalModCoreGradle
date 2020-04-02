@@ -17,6 +17,7 @@ public class Config {
     public String modVersion;
 
     public String umcVersion;
+    public String umcPath;
     public String umcJar;
 
     public Config(Project project) {
@@ -51,13 +52,19 @@ public class Config {
 
 
         if (umcJar != null && umcJar.length() != 0) {
-            String jar = umcJar;
-            if (!Files.exists(Paths.get(jar))) {
+            if (!Files.exists(Paths.get(umcJar))) {
+                throw new RuntimeException(String.format("Unable to find UMC jar: %s", umcJar));
+            }
+            vars.put("UMC_DEPENDENCY", String.format("files ( \"%s\" )", umcJar));
+        } else if (umcPath != null && umcPath.length() != 0) {
+            File jar = new File(umcPath, String.format("UniversalModCore-%s-%s.jar", umcVersion, loaderVersion));
+            if (!jar.exists()) {
                 throw new RuntimeException(String.format("Unable to find UMC jar: %s", jar));
             }
-            vars.put("UMC_DEPENDENCY", String.format("files ( \"%s\" )", jar));
+            umcJar = jar.toString();
+            vars.put("UMC_DEPENDENCY", String.format("files ( \"%s\" )", umcJar));
         } else {
-            List<CurseForge.CurseAsset> assets = CurseForge.getAssets(277736);
+            List<CurseForge.CurseAsset> assets = CurseForge.getAssets(371784);
             Optional<CurseForge.CurseAsset> asset = assets.stream()
                     .filter(a -> a.fileName.contains(version))
                     .filter(a -> a.fileName.contains(require("loaderVersion", loaderVersion)))
