@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class Util {
     public static void GitClone(String repository, String branch, String path) throws IOException, GitAPIException {
-        File clonePath = new File(".", path);
+        File clonePath = new File(System.getProperty("user.dir"), path);
         String useSSH = System.getProperty("ssh.http");
         if (useSSH != null) {
             useSSH = useSSH.toLowerCase();

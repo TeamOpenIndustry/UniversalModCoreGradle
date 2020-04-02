@@ -1,14 +1,12 @@
 package cam72cam.universalmodcore;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.Task;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -27,10 +25,23 @@ public class Setup extends DefaultTask {
                     if (!path.endsWith(".jar")) {
                         input = c.replaceAll(input, true);
                     }
-                    Path out = Paths.get(".", c.replace(path.replace("template" + File.separator, ""), false));
 
+                    if (path.endsWith("/")) {
+                        continue;
+                    }
+
+                    if (path.endsWith("gradle-wrapper.jar")) {
+                        // TODO removeme windows hack
+                        continue;
+                    }
+
+                    path = path.replace("template/", "");
+
+                    Path out = Paths.get(System.getProperty("user.dir"), c.replace(path, false));
                     System.out.println(out);
+
                     out.getParent().toFile().mkdirs();
+
                     out.toFile().delete();
                     Files.copy(input, out);
                     if (out.toString().equals("./gradlew")) {
