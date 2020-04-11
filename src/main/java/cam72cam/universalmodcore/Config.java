@@ -6,6 +6,7 @@ import org.gradle.api.Project;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -18,7 +19,6 @@ public class Config {
 
     public String umcVersion;
     public String umcPath;
-    public String umcJar;
 
     public Config(Project project) {
         // What to do here?
@@ -51,18 +51,14 @@ public class Config {
         vars.put("UMC_API_NEXT", String.format("%d.%d", major, minor + 1));
 
 
-        if (umcJar != null && umcJar.length() != 0) {
-            if (!Files.exists(Paths.get(umcJar))) {
-                throw new RuntimeException(String.format("Unable to find UMC jar: %s", umcJar));
-            }
-            vars.put("UMC_DEPENDENCY", String.format("files ( \"%s\" )", umcJar));
-        } else if (umcPath != null && umcPath.length() != 0) {
+        if (umcPath != null && umcPath.length() != 0) {
             File jar = new File(umcPath, String.format("UniversalModCore-%s-%s.jar", umcVersion, loaderVersion));
             if (!jar.exists()) {
                 throw new RuntimeException(String.format("Unable to find UMC jar: %s", jar));
             }
-            umcJar = jar.toString();
-            vars.put("UMC_DEPENDENCY", String.format("files ( \"%s\" )", umcJar));
+            vars.put("UMC_REPO", String.format("repositories { flatDir { dirs '%s' } }", jar.getParent()));
+            vars.put("UMC_DEPENDENCY", String.format("name: '%s'", jar.getName().replace(".jar", "")));
+            vars.put("UMC_FILE", jar.getPath());
         } else {
             List<CurseForge.CurseAsset> assets = CurseForge.getAssets(371784);
             Optional<CurseForge.CurseAsset> asset = assets.stream()
@@ -74,6 +70,7 @@ public class Config {
             }
             vars.put("UMC_DOWNLOAD", asset.get().downloadUrl);
             vars.put("UMC_DEPENDENCY", String.format("'curse.maven:universalmodcore:%s'", asset.get().id));
+            vars.put("UMC_REPO", "");
         }
     }
 
@@ -89,7 +86,7 @@ public class Config {
         if (vars.containsKey("UMC_DOWNLOAD")) {
             return new URL(vars.get("UMC_DOWNLOAD")).openStream();
         }
-        return new FileInputStream(umcJar);
+        return new FileInputStream(vars.get("UMC_FILE"));
     }
 
     public String replace(String s, boolean hash) {
