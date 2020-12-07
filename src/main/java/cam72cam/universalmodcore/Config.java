@@ -5,9 +5,6 @@ import org.gradle.api.Project;
 
 import java.io.*;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class Config {
@@ -60,16 +57,8 @@ public class Config {
             vars.put("UMC_DEPENDENCY", String.format("name: '%s'", jar.getName().replace(".jar", "")));
             vars.put("UMC_FILE", jar.getPath());
         } else {
-            List<CurseForge.CurseAsset> assets = CurseForge.getAssets(371784);
-            Optional<CurseForge.CurseAsset> asset = assets.stream()
-                    .filter(a -> a.fileName.contains(version))
-                    .filter(a -> a.fileName.contains(require("loaderVersion", loaderVersion)))
-                    .findFirst();
-            if (!asset.isPresent()) {
-                throw new RuntimeException(String.format("Unable to locate version '%s' for Minecraft '%s'", vars.get("UMC_VERSION"), loaderVersion));
-            }
             vars.put("UMC_DOWNLOAD", String.format("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/%s-%s/UniversalModCore-%s-%s.jar", version, loaderVersion, version, loaderVersion));
-            vars.put("UMC_DEPENDENCY", String.format("'curse.maven:universalmodcore:%s'", asset.get().id));
+            vars.put("UMC_DEPENDENCY", String.format("'cam72cam.universalmodcore:UniversalModCore:%s-%s'", version, loaderVersion));
             vars.put("UMC_REPO", "repositories { maven { url = \"https://teamopenindustry.cc/maven\" }}");
 
         }
