@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven'
     id 'groovy'
     id 'maven-publish'
     id "java-gradle-plugin"
@@ -69,6 +70,25 @@ publishing {
             artifact sourcesJar {
                 classifier "sources"
             }
+        }
+    }
+}
+
+task deployJar(type: Jar)
+
+configurations {
+    deployerJars
+}
+
+dependencies {
+    deployerJars "org.apache.maven.wagon:wagon-ssh:2.9"
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        configuration = configurations.deployerJars
+        repository(url: "scp://teamopenindustry.cc/var/www/html/maven/") {
+            authentication(userName: "mavenci", privateKey: "publish_key")
         }
     }
 }
