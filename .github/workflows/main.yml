@@ -1,0 +1,15 @@
+main:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup
+    - name: keyscan
+      run: mkdir -p ~/.ssh/ && ssh-keyscan -t rsa teamopenindustry.cc >> ~/.ssh/authorized_keys
+    - name: secrets
+      env: # Or as an environment variable
+        super_secret: ${{ secrets.SuperSecret }}
+      run: echo "${SUPER_SECRET}" >> publish_key
+    - name: Gradle uploadArchives
+      run: ./gradlew classes
+    - name: cleanup
+      run: rm publish_key
