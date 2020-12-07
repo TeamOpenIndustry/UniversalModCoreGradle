@@ -12,6 +12,6 @@ jobs:
         super_secret: ${{ secrets.SuperSecret }}
       run: echo "${SUPER_SECRET}" >> publish_key
     - name: Gradle uploadArchives
-      run: ./gradlew classes
+      run: ./gradlew uploadArchives
     - name: cleanup
       run: rm publish_key
