@@ -5,6 +5,9 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,6 +22,21 @@ public class CurseForge {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String asset(int projectId, int fileId) {
+            try {
+                String urlStr = IOUtils.toString(new URL(String.format("https://addons-ecs.forgesvc.net/api/v2/addon/%d/file/%d/download-url", projectId, fileId)).openStream());
+                URL url = new URL(urlStr);
+                Path path = Paths.get(System.getProperty("user.dir"), ".cache", "curseforge", url.getFile());
+                if (!path.toFile().exists()) {
+                    path.getParent().toFile().mkdirs();
+                    Files.copy(url.openStream(), path);
+                }
+                return path.toAbsolutePath().toString();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
     }
 
     //@JsonIgnoreProperties(ignoreUnknown = true)
