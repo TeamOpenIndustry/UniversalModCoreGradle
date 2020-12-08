@@ -49,7 +49,7 @@ public class Config {
 
 
         if (umcPath != null && umcPath.length() != 0) {
-            File jar = new File(umcPath, String.format("UniversalModCore-%s-%s.jar", umcVersion, loaderVersion));
+            File jar = new File(umcPath, String.format("UniversalModCore-%s-%s.jar", loaderVersion, umcVersion));
             if (!jar.exists()) {
                 throw new RuntimeException(String.format("Unable to find UMC jar: %s", jar));
             }
@@ -57,8 +57,8 @@ public class Config {
             vars.put("UMC_DEPENDENCY", String.format("name: '%s'", jar.getName().replace(".jar", "")));
             vars.put("UMC_FILE", jar.getPath());
         } else {
-            vars.put("UMC_DOWNLOAD", String.format("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/%s-%s/UniversalModCore-%s-%s.jar", version, loaderVersion, version, loaderVersion));
-            vars.put("UMC_DEPENDENCY", String.format("'cam72cam.universalmodcore:UniversalModCore:%s-%s'", version, loaderVersion));
+            vars.put("UMC_DOWNLOAD", String.format("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/%s-%s/UniversalModCore-%s-%s.jar", loaderVersion, version, loaderVersion, version));
+            vars.put("UMC_DEPENDENCY", String.format("'cam72cam.universalmodcore:UniversalModCore:%s-%s'", loaderVersion, version));
             vars.put("UMC_REPO", "repositories { maven { url = \"https://teamopenindustry.cc/maven\" }}");
 
         }
