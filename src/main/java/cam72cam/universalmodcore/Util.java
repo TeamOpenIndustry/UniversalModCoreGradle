@@ -8,8 +8,15 @@ import java.io.File;
 import java.io.IOException;
 
 public class Util {
+    public static String GitRevision() throws IOException, GitAPIException {
+        return Git.open(new File(System.getProperty("user.dir"))).log().setMaxCount(1).call().iterator().next().abbreviate(6).name();
+    }
+
     public static void GitClone(String repository, String branch, String path) throws IOException, GitAPIException {
         File clonePath = new File(System.getProperty("user.dir"), path);
+
+
+
         String useSSH = System.getProperty("ssh.http");
         if (useSSH != null) {
             useSSH = useSSH.toLowerCase();
