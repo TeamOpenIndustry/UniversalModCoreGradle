@@ -3,29 +3,25 @@ package cam72cam.universalmodcore;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.io.File;
 import java.io.IOException;
 
 public class Util {
-    public static String GitRevision() throws IOException, GitAPIException {
-        return Git.open(new File(System.getProperty("user.dir"))).log().setMaxCount(1).call().iterator().next().abbreviate(6).name();
+    public static String gitRevision(File path) throws IOException, GitAPIException {
+        Git repo = Git.open(path);
+        RevCommit commit = repo.log().setMaxCount(1).call().iterator().next();
+        String name = repo.getRepository().newObjectReader().abbreviate(commit, 7).name();
+        repo.close();
+        return name;
     }
 
-    public static void GitClone(String repository, String branch, String path) throws IOException, GitAPIException {
-        File clonePath = new File(System.getProperty("user.dir"), path);
-
-
-
-        String useSSH = System.getProperty("ssh.http");
-        if (useSSH != null) {
-            useSSH = useSSH.toLowerCase();
-        }
-
+    public static void gitClone(String repository, String branch, File clonePath, Boolean useSSH) throws IOException, GitAPIException {
         String uri = repository;
 
-        boolean wantsHttp = "yes".equals(useSSH) || "true".equals(useSSH);
-        boolean wantsGit = "no".equals(useSSH) || "false".equals(useSSH);
+        boolean wantsHttp = useSSH != null && !useSSH;
+        boolean wantsGit = useSSH != null && useSSH;
         boolean isHttp = uri.startsWith("http");
         boolean isGit = uri.startsWith("git@");
 

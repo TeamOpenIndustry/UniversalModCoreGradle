@@ -1,64 +1,40 @@
 plugins {
     id 'java'
-    id 'maven'
     id 'groovy'
     id 'maven-publish'
-    id "java-gradle-plugin"
-    id "com.gradle.plugin-publish" version "0.11.0"
 }
 
 group 'cam72cam.universalmodcore'
-version '0.1.3'
+version '0.1.0'
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
 }
 
+configurations {
+    shade
+    implementation.extendsFrom shade
+}
+
 dependencies {
-    compile 'org.apache.commons:commons-io:1.3.2'
-    compile 'com.google.code.gson:gson:2.8.6'
-    compile 'org.eclipse.jgit:org.eclipse.jgit:4.4.1.201607150455-r'
+    shade 'org.apache.commons:commons-io:1.3.2'
+    shade 'com.google.code.gson:gson:2.8.6'
+    shade 'org.eclipse.jgit:org.eclipse.jgit:4.4.1.201607150455-r'
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    from javadoc.destinationDir
-    classifier = 'javadoc'
-}
-
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
-}
-
-artifacts {
-    archives jar
-    archives javadocJar
-    archives sourcesJar
-}
-
-gradlePlugin {
-    plugins {
-        curseGradlePlugin {
-            id = 'cam72cam.universalmodcore'
-            implementationClass = 'cam72cam.universalmodcore.UMCPlugin'
-        }
+jar {
+  configurations.shade.each { dep ->
+    from(project.zipTree(dep)){
+      exclude 'META-INF', 'META-INF/**'
     }
-}
+  }
 
-
-pluginBundle {
-    website = 'https://github.com/TeamOpenIndustry/UniversalModCoreGradle'
-    vcsUrl = 'https://github.com/TeamOpenIndustry/UniversalModCoreGradle'
-    description = 'Allow users to build the same code for any minecraft version'
-
-    plugins() {
-        curseGradlePlugin {
-            displayName = 'Universal Mod Core'
-            version = project.version
-            tags = ['maven', 'minecraft', 'forge']
-        }
-    }
+  manifest {
+    attributes(
+      'Main-Class': 'cam72cam.universalmodcore.Setup'
+    )
+  }
 }
 
 
@@ -66,29 +42,6 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-
-            artifact sourcesJar {
-                classifier "sources"
-            }
-        }
-    }
-}
-
-task deployJar(type: Jar)
-
-configurations {
-    deployerJars
-}
-
-dependencies {
-    deployerJars "org.apache.maven.wagon:wagon-ssh:2.9"
-}
-
-uploadArchives {
-    repositories.mavenDeployer {
-        configuration = configurations.deployerJars
-        repository(url: "scp://teamopenindustry.cc/var/www/html/maven/") {
-            authentication(userName: "mavenci", privateKey: "publish_key")
         }
     }
 }
