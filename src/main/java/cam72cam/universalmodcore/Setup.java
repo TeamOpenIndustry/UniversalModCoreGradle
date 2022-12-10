@@ -78,11 +78,16 @@ public class Setup {
         for (String line : template) {
             if (parts.containsKey(line)) {
                 output.addAll(parts.get(line));
+                parts.remove(line);
             } else {
                 output.add(line);
             }
         }
         Files.write(buildGradle, output.stream().map(config::replace).collect(Collectors.toList()));
+
+        for (String key : parts.keySet()) {
+            System.out.printf("WARNING: Missing template block %s!  Build is likely broken%n", key);
+        }
 
         if (config.integration != null) {
             Util.gitClone(
