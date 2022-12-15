@@ -3,6 +3,7 @@ package cam72cam.universalmodcore;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.io.File;
@@ -45,16 +46,17 @@ public class Util {
         System.out.println("Cloning " + uri + " into " + clonePath);
 
 
-        Git.cloneRepository()
+        try (Git repo = Git.cloneRepository()
                 .setDirectory(clonePath)
                 .setURI(uri)
                 .setNoCheckout(true)
                 .setCloneAllBranches(true)
-                .call()
-                .checkout()
-                .setCreateBranch(true)
-                .setName(branch)
-                .setStartPoint("origin/" + branch)
-                .call();
+                .call()) {
+            repo.checkout()
+                    .setCreateBranch(true)
+                    .setName(branch)
+                    .setStartPoint("origin/" + branch)
+                    .call();
+        }
     }
 }
