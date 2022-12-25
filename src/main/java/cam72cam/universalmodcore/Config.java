@@ -74,7 +74,7 @@ public class Config {
         }
     }
 
-    public Config(JsonObject data, String loaderBranch) throws GitAPIException, IOException {
+    public Config(JsonObject data, String loaderBranch, boolean useSSH) throws GitAPIException, IOException {
         mod = new Mod(data.get("mod").getAsJsonObject());
         integration = data.has("integration") ? new Integration(data.get("integration").getAsJsonObject()) : null;
         umc = new UMC(data.get("umc").getAsJsonObject());
@@ -100,7 +100,7 @@ public class Config {
             File temp = null;
             if (umc.path == null) {
                 temp = Files.createTempDirectory("umc-loader").toFile();
-                Util.gitClone("https://github.com/TeamOpenIndustry/UniversalModCore.git", loaderBranch, temp, false);
+                Util.gitClone("https://github.com/TeamOpenIndustry/UniversalModCore.git", loaderBranch, temp, useSSH);
                 path = temp;
             } else {
                 path = Paths.get(System.getProperty("user.dir"), umc.path).toFile();

@@ -24,7 +24,8 @@ public class Setup {
                 ))
         ).getAsJsonObject();
         String loaderBranch = args[0];
-        Config config = new Config(configObj, loaderBranch);
+        boolean useSSH = args.length >= 2 && args[1].equals("ssh");
+        Config config = new Config(configObj, loaderBranch, useSSH);
 
         ZipInputStream zip = new ZipInputStream(config.openJarStream());
         for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
@@ -94,7 +95,7 @@ public class Setup {
                     config.integration.repo,
                     String.format(config.integration.branch, config.minecraftLoader),
                     Paths.get(System.getProperty("user.dir"), config.integration.path).toFile(),
-                    args.length != 2 ? null : !args[1].equals("https")
+                    useSSH
             );
         }
     }
