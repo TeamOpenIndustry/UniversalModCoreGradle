@@ -23,7 +23,19 @@ public class Setup {
                         Files.readAllBytes(Paths.get("umc.json"))
                 ))
         ).getAsJsonObject();
+
+        if (args.length == 0) {
+            System.err.println("No loader branch specified! Available branches can be found in the UniversalModCore GitHub repository.");
+            return;
+        }
+
         String loaderBranch = args[0];
+        String[] split = loaderBranch.split("-");
+        if (split.length < 2 || !split[0].matches("1\\.\\d*\\.\\d*") || !split[1].matches("[\\w-]+")) {
+            System.err.println("Invalid loader branch! It should be in the format '<minecraft-version>-<loader>'. For example, '1.12.2-forge'.");
+            return;
+        }
+
         boolean useSSH = args.length >= 2 && args[1].equals("ssh");
         Config config = new Config(configObj, loaderBranch, useSSH);
 
