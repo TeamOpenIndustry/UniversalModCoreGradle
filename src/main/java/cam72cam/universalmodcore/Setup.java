@@ -28,6 +28,7 @@ public class Setup {
             System.err.println("No loader branch specified! Available branches can be found in the UniversalModCore GitHub repository.");
             return;
         }
+
         String loaderBranch = args[0];
         String[] split = loaderBranch.split("-");
         if (split.length < 2 || !split[0].matches("1\\.\\d*\\.\\d*") || !split[1].matches("[\\w-]+")) {
@@ -35,7 +36,8 @@ public class Setup {
             return;
         }
 
-        Config config = new Config(configObj, loaderBranch);
+        boolean useSSH = args.length >= 2 && args[1].equals("ssh");
+        Config config = new Config(configObj, loaderBranch, useSSH);
 
         ZipInputStream zip = new ZipInputStream(config.openJarStream());
         for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
@@ -105,7 +107,7 @@ public class Setup {
                     config.integration.repo,
                     String.format(config.integration.branch, config.minecraftLoader),
                     Paths.get(System.getProperty("user.dir"), config.integration.path).toFile(),
-                    args.length != 2 ? null : !args[1].equals("https")
+                    useSSH
             );
         }
     }
