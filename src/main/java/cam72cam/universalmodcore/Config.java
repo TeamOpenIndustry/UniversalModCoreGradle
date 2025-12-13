@@ -98,7 +98,7 @@ public class Config {
             File temp = null;
             if (umc.path == null) {
                 temp = Files.createTempDirectory("umc-loader").toFile();
-                Util.gitClone("https://github.com/TeamOpenIndustry/UniversalModCore.git", mcVersion, temp, false);
+                Util.gitClone("https://github.com/TeamOpenIndustry/UniversalModCore.git", minecraftLoader, temp, false);
                 path = temp;
             } else {
                 path = Paths.get(System.getProperty("user.dir"), umc.path).toFile();
@@ -127,7 +127,7 @@ public class Config {
 
 
         if (umc.path != null && !umc.path.isEmpty()) {
-            File jar = new File(umc.path, String.format("build/libs/UniversalModCore-%s-%s.jar", mcVersion, version));
+            File jar = new File(umc.path, String.format("build/libs/UniversalModCore-%s-%s.jar", minecraftLoader, version));
             if (!jar.exists()) {
                 throw new RuntimeException(String.format("Unable to find UMC jar: %s", jar));
             }
@@ -136,8 +136,8 @@ public class Config {
             vars.put("UMC_FILE", jar.getPath());
         } else {
             vars.put("UMC_REPO", "repositories { maven { url = \"https://teamopenindustry.cc/maven\" }}");
-            vars.put("UMC_DEPENDENCY", String.format("'cam72cam.universalmodcore:UniversalModCore:%s-%s'", mcVersion, version));
-            vars.put("UMC_DOWNLOAD", String.format("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/%s-%s/UniversalModCore-%s-%s.jar", mcVersion, version, mcVersion, version));
+            vars.put("UMC_DEPENDENCY", String.format("'cam72cam.universalmodcore:UniversalModCore:%s-%s'", minecraftLoader, version));
+            vars.put("UMC_DOWNLOAD", String.format("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/%s-%s/UniversalModCore-%s-%s.jar", minecraftLoader, version, minecraftLoader, version));
         }
 
         ArrayList<Mod.Dependency> dependencies = new ArrayList<>(mod.dependencies);
