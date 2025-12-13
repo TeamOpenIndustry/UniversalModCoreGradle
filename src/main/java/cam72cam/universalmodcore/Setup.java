@@ -30,12 +30,24 @@ public class Setup {
         }
         String loaderBranch = args[0];
         String[] split = loaderBranch.split("-");
-        if (split.length < 2 || !split[0].matches("1\\.\\d*\\.\\d*") || !split[1].matches("[\\w-]+")) {
+        if (split.length < 2) {
             System.err.println("Invalid loader branch! It should be in the format '<minecraft-version>-<loader>'. For example, '1.12.2-forge'.");
             return;
         }
+        String version = split[0];
+        Loader brand = Loader.parse(split[1]);
+        String intermediary = version;
 
-        Config config = new Config(configObj, loaderBranch);
+        if (intermediary.startsWith("1.")) {
+            intermediary = intermediary.substring(2);
+        }
+
+        if (!intermediary.matches("\\d*\\.\\d*")) {
+            System.err.println("Invalid Minecraft version: " + version + ", it should be 1.xx.xx for 1.21.11 and below or xx.x for 26.1 and up");
+            return;
+        }
+
+        Config config = new Config(configObj, version, brand);
 
         ZipInputStream zip = new ZipInputStream(config.openJarStream());
         for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {

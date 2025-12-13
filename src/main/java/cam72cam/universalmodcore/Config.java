@@ -74,13 +74,11 @@ public class Config {
         }
     }
 
-    public Config(JsonObject data, String loaderBranch) throws GitAPIException, IOException {
+    public Config(JsonObject data, String mcVersion, Loader brand) throws GitAPIException, IOException {
         mod = new Mod(data.get("mod").getAsJsonObject());
         integration = data.has("integration") ? new Integration(data.get("integration").getAsJsonObject()) : null;
         umc = new UMC(data.get("umc").getAsJsonObject());
-        String minecraft = loaderBranch.split("-")[0];
-        String loader = loaderBranch.split("-")[1];
-        this.minecraftLoader = minecraft + "-" + loader;
+        this.minecraftLoader = mcVersion + "-" + brand.toString();
 
         vars.clear();
         vars.put("PACKAGE", require("mod.package", mod.pkg));
@@ -89,9 +87,9 @@ public class Config {
         vars.put("NAME", require("mod.name", mod.name));
         vars.put("ID", require("mod.id", mod.id));
         vars.put("VERSION", require("mod.version", mod.version));
-        vars.put("LOADER_VERSION", loaderBranch);
-        vars.put("MINECRAFT", minecraft);
-        vars.put("LOADER", loader);
+        vars.put("LOADER_VERSION", minecraftLoader);
+        vars.put("MINECRAFT", mcVersion);
+        vars.put("LOADER", brand.toString());
 
         String version = require("umc.version", umc.version);
 
@@ -100,7 +98,7 @@ public class Config {
             File temp = null;
             if (umc.path == null) {
                 temp = Files.createTempDirectory("umc-loader").toFile();
-                Util.gitClone("https://github.com/TeamOpenIndustry/UniversalModCore.git", loaderBranch, temp, false);
+                Util.gitClone("https://github.com/TeamOpenIndustry/UniversalModCore.git", mcVersion, temp, false);
                 path = temp;
             } else {
                 path = Paths.get(System.getProperty("user.dir"), umc.path).toFile();
@@ -128,8 +126,8 @@ public class Config {
         vars.put("UMC_VERSION", version);
 
 
-        if (umc.path != null && umc.path.length() != 0) {
-            File jar = new File(umc.path, String.format("build/libs/UniversalModCore-%s-%s.jar", loaderBranch, version));
+        if (umc.path != null && !umc.path.isEmpty()) {
+            File jar = new File(umc.path, String.format("build/libs/UniversalModCore-%s-%s.jar", mcVersion, version));
             if (!jar.exists()) {
                 throw new RuntimeException(String.format("Unable to find UMC jar: %s", jar));
             }
@@ -138,8 +136,8 @@ public class Config {
             vars.put("UMC_FILE", jar.getPath());
         } else {
             vars.put("UMC_REPO", "repositories { maven { url = \"https://teamopenindustry.cc/maven\" }}");
-            vars.put("UMC_DEPENDENCY", String.format("'cam72cam.universalmodcore:UniversalModCore:%s-%s'", loaderBranch, version));
-            vars.put("UMC_DOWNLOAD", String.format("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/%s-%s/UniversalModCore-%s-%s.jar", loaderBranch, version, loaderBranch, version));
+            vars.put("UMC_DEPENDENCY", String.format("'cam72cam.universalmodcore:UniversalModCore:%s-%s'", mcVersion, version));
+            vars.put("UMC_DOWNLOAD", String.format("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/%s-%s/UniversalModCore-%s-%s.jar", mcVersion, version, mcVersion, version));
         }
 
         ArrayList<Mod.Dependency> dependencies = new ArrayList<>(mod.dependencies);
@@ -155,14 +153,29 @@ public class Config {
         vars.put("FORGE_STRING_DEPENDENCIES", forgeStringDependencies);
 
         String forgeTomlDependencies = dependencies.stream()
-                .map(dep ->
-                        String.format("[[dependencies.%s]]%n", mod.id) +
-                                String.format("    modId=\"%s\"%n", dep.id) +
-                                String.format("    mandatory=true%n") +
-                                String.format("    versionRange=\"%s\"%n", dep.versions) +
-                                String.format("    ordering=\"BEFORE\"%n") +
-                                String.format("    side=\"BOTH\"%n")
-                )
+                .map(dep -> {
+                        switch (brand) {
+                            case FORGE:
+                                return String.format("[[dependencies.%s]]%n", mod.id) +
+                                       String.format("    modId=\"%s\"%n", dep.id) +
+                                       String.format("    mandatory=true%n") +
+                                       String.format("    versionRange=\"%s\"%n", dep.versions) +
+                                       String.format("    ordering=\"BEFORE\"%n") +
+                                       String.format("    side=\"BOTH\"%n");
+                            case NEOFORGE:
+                                return String.format("[[dependencies.%s]]%n", mod.id) +
+                                        String.format("    modId=\"%s\"%n", dep.id) +
+                                        String.format("    type='required'%n") +
+                                        String.format("    versionRange=\"%s\"%n", dep.versions) +
+                                        String.format("    ordering=\"BEFORE\"%n") +
+                                        String.format("    side=\"BOTH\"%n");
+                            case FABRIC:
+                            case QUILT:
+                            default:
+                                //TODO
+                                return null;
+                    }
+                })
                 .collect(Collectors.joining(System.lineSeparator() + System.lineSeparator()));
         vars.put("FORGE_TOML_DEPENDENCIES", forgeTomlDependencies);
 
@@ -171,7 +184,7 @@ public class Config {
 
 
     private String require(String name, String s) {
-        if (s == null || s.trim().length() == 0) {
+        if (s == null || s.trim().isEmpty()) {
             throw new RuntimeException(String.format("Missing variable %s in config: %s", name, s));
         }
         return s;
