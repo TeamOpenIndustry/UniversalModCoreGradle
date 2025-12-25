@@ -36,14 +36,7 @@ public class Setup {
         }
         String version = split[0];
         Loader brand = Loader.parse(split[1]);
-        String intermediary = version;
-
-        if (intermediary.startsWith("1.")) {
-            intermediary = intermediary.substring(2);
-        }
-
-        if (!intermediary.matches("\\d*\\.\\d*")) {
-            System.err.println("Invalid Minecraft version: " + version + ", it should be 1.xx.xx for 1.21.11 and below or xx.x for 26.1 and up");
+        if (!isValidVersion(version)) {
             return;
         }
 
@@ -120,5 +113,25 @@ public class Setup {
                     args.length != 2 ? null : !args[1].equals("https")
             );
         }
+    }
+
+    private static boolean isValidVersion(String version) {
+        String intermediary = version;
+
+        if (intermediary.startsWith("1.")) {
+            intermediary = intermediary.substring(2);
+            // Up to 1.21
+            if (!intermediary.matches("([7-9]|1[0-9]|20|21)(\\.\\d+)*")) {
+                System.err.println("Invalid minecraft version: " + version + ", it should be 1.xx.xx for 1.21.11 and below, and above or equals to 1.7.10");
+                return false;
+            }
+        } else {
+            //Start from 26.1
+            if (!intermediary.matches("(2[6-9]|[3-9]\\d)(\\.\\d+)+")) {
+                System.err.println("Invalid minecraft version: " + version + ", it should be xx.x for 26.1 and up");
+                return false;
+            }
+        }
+        return true;
     }
 }
