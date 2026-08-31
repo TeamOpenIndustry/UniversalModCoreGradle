@@ -116,7 +116,7 @@ public class Config {
                     FileUtils.deleteDirectory(temp);
                 }
             } catch (IOException e) {
-                System.out.println("Could not delete " + temp.getAbsolutePath());
+                System.out.println("Could not delete temp file " + temp.getAbsolutePath());
             }
         }
 
