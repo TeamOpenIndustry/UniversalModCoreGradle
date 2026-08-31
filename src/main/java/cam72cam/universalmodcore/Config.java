@@ -80,7 +80,6 @@ public class Config {
         umc = new UMC(data.get("umc").getAsJsonObject());
         this.minecraftLoader = mcVersion + "-" + brand.toString();
 
-        vars.clear();
         vars.put("PACKAGE", require("mod.package", mod.pkg));
         vars.put("PACKAGEPATH", require("mod.package", mod.pkg).replace(".", File.separator));
         vars.put("CLASS", require("mod.class", mod.cls));
@@ -124,8 +123,9 @@ public class Config {
         String[] versionParts = version.split("\\.");
         int major = Integer.parseInt(versionParts[0]);
         int minor = Integer.parseInt(versionParts[1]);
-        vars.put("UMC_API", String.format("%d.%d", major, minor));
-        vars.put("UMC_API_NEXT", String.format("%d.%d", major, minor + 1));
+        int patch = Integer.parseInt(versionParts[2].split("-")[0]);
+        vars.put("UMC_API", String.format("%d.%d.%d", major, minor, patch));
+        vars.put("UMC_API_NEXT", String.format("%d.%d.0", major, minor + 1));
 
         vars.put("UMC_VERSION", version);
 
