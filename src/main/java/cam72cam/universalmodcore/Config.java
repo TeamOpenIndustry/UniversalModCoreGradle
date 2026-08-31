@@ -112,8 +112,12 @@ public class Config {
                     .trim();
             version += "-" + Util.gitRevision(path);
 
-            if (temp != null) {
-                FileUtils.deleteDirectory(temp);
+            try {
+                if (temp != null) {
+                    FileUtils.deleteDirectory(temp);
+                }
+            } catch (IOException e) {
+                System.out.println("Could not delete " + temp.getAbsolutePath());
             }
         }
 
