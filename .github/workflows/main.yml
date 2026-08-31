@@ -4,14 +4,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v5
+    - uses: actions/setup-java@v5
+      with:
+        java-version: '8'
+        distribution: 'temurin'
     - name: keyscan
       run: mkdir -p ~/.ssh/ && ssh-keyscan -t rsa teamopenindustry.cc >> ~/.ssh/known_hosts
-    - name: secrets
-      env: # Or as an environment variable
-        MAVENCI: ${{ secrets.MAVENCI }}
-      run: echo "${MAVENCI}" >> publish_key
-    - name: Gradle uploadArchives
-      run: ./gradlew uploadArchives
-    - name: cleanup
-      run: rm publish_key
+    - name: Gradle Publish
+      env:
+       MAVENCI_PASS: ${{ secrets.MAVENCI_PASS }}
+      run: ./gradlew publish
+    - uses: actions/upload-artifact@v6
+      with:
+        name: UMCSetup
+        path: build/libs/UMCSetup.jar
