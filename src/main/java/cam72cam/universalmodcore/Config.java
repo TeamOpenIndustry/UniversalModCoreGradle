@@ -1,7 +1,6 @@
 package cam72cam.universalmodcore;
 
 import com.google.gson.JsonObject;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
@@ -93,30 +92,29 @@ public class Config {
         String version = require("umc.version", umc.version);
 
         if (version.equals("latest")) {
-            File path;
-            File temp = null;
-            if (umc.path == null) {
-                temp = Files.createTempDirectory("umc-loader").toFile();
-                Util.gitClone("https://github.com/TeamOpenIndustry/UniversalModCore.git", minecraftLoader, temp, false);
-                path = temp;
+            if (umc.path != null) {
+                File path = Paths.get(System.getProperty("user.dir"), umc.path).toFile();
+                version = Files.readAllLines(Paths.get(path.getPath(), "build.gradle")).stream()
+                        .filter(x -> x.startsWith("String umcVersion = "))
+                        .findFirst()
+                        .get()
+                        .replace("String umcVersion = ", "")
+                        .replace("\"", "")
+                        .trim();
+                version += "-" + Util.gitRevision(path);
             } else {
-                path = Paths.get(System.getProperty("user.dir"), umc.path).toFile();
-            }
-            version = Files.readAllLines(Paths.get(path.getPath(), "build.gradle")).stream()
-                    .filter(x -> x.startsWith("String umcVersion = "))
-                    .findFirst()
-                    .get()
-                    .replace("String umcVersion = ", "")
-                    .replace("\"", "")
-                    .trim();
-            version += "-" + Util.gitRevision(path);
-
-            try {
-                if (temp != null) {
-                    FileUtils.deleteDirectory(temp);
-                }
-            } catch (IOException e) {
-                System.out.println("Could not delete temp file " + temp.getAbsolutePath());
+                String metadata = IOUtils.toString(new URL("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/maven-metadata.xml").openStream());
+                System.out.println(metadata);
+                version = Arrays.stream(metadata.split("<version>"))
+                        .skip(1)
+                        .map(x -> x.substring(0, x.indexOf("</version>")))
+                        .filter(x -> x.startsWith(minecraftLoader + "-"))
+                        .map(x -> x.substring(minecraftLoader.length() + 1))
+                                .sorted(Comparator.comparingInt((String v) -> Integer.parseInt(v.split("[.-]")[0]))
+                                                  .thenComparingInt(v -> Integer.parseInt(v.split("[.-]")[1]))
+                                                  .thenComparingInt(v -> Integer.parseInt(v.split("[.-]")[2])))
+                        .reduce((a, b) -> b)
+                        .orElseThrow(() -> new IllegalArgumentException(String.format("Could not found matching Minecraft version and loader pair %s", minecraftLoader)));
             }
         }
 
