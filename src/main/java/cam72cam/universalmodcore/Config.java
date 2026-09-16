@@ -104,7 +104,6 @@ public class Config {
                 version += "-" + Util.gitRevision(path);
             } else {
                 String metadata = IOUtils.toString(new URL("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/maven-metadata.xml").openStream());
-                System.out.println(metadata);
                 version = Arrays.stream(metadata.split("<version>"))
                         .skip(1)
                         .map(x -> x.substring(0, x.indexOf("</version>")))
