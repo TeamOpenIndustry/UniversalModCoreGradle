@@ -2,8 +2,8 @@ package cam72cam.universalmodcore;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.io.File;
@@ -34,6 +34,29 @@ public class Util {
         if (isGit && wantsHttp) {
             uri = uri.replaceFirst(":", "/");
             uri = uri.replaceFirst("git@", "https://");
+        }
+
+        if (new File(clonePath, ".git").isDirectory()) {
+            try (Git repo = Git.open(clonePath)) {
+                String remoteUrl = repo.getRepository().getConfig().getString("remote", "origin", "url");
+                if (uri.equals(remoteUrl)) {
+                    System.out.println("Reusing cloned integration repo " + clonePath);
+
+                    repo.fetch().call();
+
+                    if (repo.getRepository().exactRef("refs/heads/" + branch) != null) {
+                        repo.checkout().setName(branch).call();
+                        repo.reset().setRef("origin/" + branch).setMode(ResetCommand.ResetType.HARD).call();
+                    } else {
+                        repo.checkout()
+                                .setCreateBranch(true)
+                                .setName(branch)
+                                .setStartPoint("origin/" + branch)
+                                .call();
+                    }
+                    return;
+                }
+            }
         }
 
         if (clonePath.exists()) {

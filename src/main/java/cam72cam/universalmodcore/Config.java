@@ -93,6 +93,7 @@ public class Config {
 
         if (version.equals("latest")) {
             if (umc.path != null) {
+                System.out.println("Using "+umc.path+" as UMC development project folder to find UMC");
                 File path = Paths.get(System.getProperty("user.dir"), umc.path).toFile();
                 version = Files.readAllLines(Paths.get(path.getPath(), "build.gradle")).stream()
                         .filter(x -> x.startsWith("String umcVersion = "))
@@ -103,6 +104,7 @@ public class Config {
                         .trim();
                 version += "-" + Util.gitRevision(path);
             } else {
+                System.out.println("Fetching versions from teamopenindustry.cc...");
                 String metadata = IOUtils.toString(new URL("https://teamopenindustry.cc/maven/cam72cam/universalmodcore/UniversalModCore/maven-metadata.xml").openStream());
                 version = Arrays.stream(metadata.split("<version>"))
                         .skip(1)
@@ -116,6 +118,7 @@ public class Config {
                         .orElseThrow(() -> new IllegalArgumentException(String.format("Could not found matching Minecraft version and loader pair %s", minecraftLoader)));
             }
         }
+        System.out.println("Selected UMC "+version);
 
         String[] versionParts = version.split("\\.");
         int major = Integer.parseInt(versionParts[0]);
